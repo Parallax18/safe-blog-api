@@ -32,7 +32,12 @@ exports.create = async (req, res) => {
 exports.findAll = async (req, res) => {
   try {
     const post = await PostModel.find();
-    res.status(200).json(post);
+    const populatedPost = await PostModel.find().exec();
+    await PostModel.populate(populatedPost, { path: "comments.author" });
+    await PostModel.populate(populatedPost, {
+      path: "comments.replies.author",
+    });
+    res.status(200).json(populatedPost);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
@@ -41,7 +46,12 @@ exports.findAll = async (req, res) => {
 exports.findOne = async (req, res) => {
   try {
     const post = await PostModel.findById(req.params.id);
-    res.status(200).json(post);
+    const populatedPost = await PostModel.findById(req.params.id).exec();
+    await PostModel.populate(populatedPost, { path: "comments.author" });
+    await PostModel.populate(populatedPost, {
+      path: "comments.replies.author",
+    });
+    res.status(200).json(populatedPost);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
