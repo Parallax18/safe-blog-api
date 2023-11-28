@@ -1,25 +1,31 @@
 const mongoose = require("mongoose");
 
-const replySchema = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  body: {
-    type: String,
-    required: true,
-    default: "",
+const replySchema = new mongoose.Schema(
+  {
+    _id: mongoose.Schema.Types.ObjectId,
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    body: {
+      type: String,
+      required: true,
+      default: "",
+    },
   },
-});
+  { timestamps: true }
+);
 
-const commentSchema = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  body: {
-    type: String,
-    required: true,
-    default: "",
+const commentSchema = new mongoose.Schema(
+  {
+    _id: mongoose.Schema.Types.ObjectId,
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    body: {
+      type: String,
+      required: true,
+      default: "",
+    },
+    replies: [replySchema],
   },
-  replies: [replySchema],
-});
+  { timestamps: true }
+);
 
 const postSchema = new mongoose.Schema(
   {
