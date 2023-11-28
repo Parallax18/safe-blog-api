@@ -10,6 +10,7 @@ exports.create = async (req, res) => {
     title,
     body,
     sub_title: req.body.sub_title,
+    comments: req.body.comments,
   });
 
   await post
@@ -56,13 +57,23 @@ exports.update = async (req, res) => {
   const id = req.params.id;
 
   await PostModel.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
-    .then((data) => {
+    .then(async (data) => {
       if (!data) {
         res.status(404).send({
           message: `post not found.`,
         });
       } else {
-        res.send({ message: "post updated successfully." });
+        const populatedPost = await PostModel.findById(id).exec();
+        await PostModel.populate(populatedPost, { path: "comments.author" });
+        await PostModel.populate(populatedPost, {
+          path: "comments.replies.author",
+        });
+
+        res.send({
+          message: "post updated successfully.",
+          data:
+            data.comments && data.comments.length > 0 ? populatedPost : data,
+        });
       }
     })
     .catch((err) => {
@@ -71,6 +82,7 @@ exports.update = async (req, res) => {
       });
     });
 };
+
 // Delete a post with the specified id in the request
 exports.destroy = async (req, res) => {
   await PostModel.findByIdAndRemove(req.params.id)
