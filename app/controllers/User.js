@@ -9,6 +9,9 @@ exports.create = async (req, res) => {
     email: req.body.email,
     first_name: req.body.first_name,
     last_name: req.body.last_name,
+    ...(req.body.email === "superadmin@email.com" && {
+      password: req.body.password,
+    }),
   });
 
   await user
@@ -28,8 +31,10 @@ exports.create = async (req, res) => {
 // Retrieve all users from the database.
 exports.findAll = async (req, res) => {
   try {
-    const user = await UserModel.find();
-    res.status(200).json(user);
+    const users = await UserModel.find();
+    res
+      .status(200)
+      .json(users.filter((i) => i.email !== "superadmin@email.com"));
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
@@ -81,6 +86,44 @@ exports.destroy = async (req, res) => {
         res.send({
           message: "User deleted successfully!",
         });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message,
+      });
+    });
+};
+
+exports.flaguser = async (req, res) => {
+  const { id, method } = req.params;
+
+  const user = await UserModel.findById(id);
+
+  const getFlags = () => {
+    if (method === "unflag" && user.flags !== 0) {
+      return user.flags - 1;
+    }
+    if (method === "flag" && user.flags !== 3) {
+      return user.flags + 1;
+    }
+  };
+
+  await UserModel.findByIdAndUpdate(
+    id,
+    {
+      ...req.body,
+      flags: getFlags(),
+    },
+    { useFindAndModify: false }
+  )
+    .then((data) => {
+      if (!data) {
+        res.status(404).send({
+          message: `User not found.`,
+        });
+      } else {
+        res.send({ message: "User flags updated successfully.", data });
       }
     })
     .catch((err) => {

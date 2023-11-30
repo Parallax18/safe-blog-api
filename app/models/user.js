@@ -14,6 +14,13 @@ const schema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    password: {
+      type: String,
+    },
+    flags: {
+      type: Number,
+      default: 0,
+    },
     status: {
       type: String,
       default: "active",
