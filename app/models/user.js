@@ -26,7 +26,6 @@ const schema = new mongoose.Schema(
       type: String,
       default: "active",
     },
-    comments: [commentSchema],
   },
   { timestamps: true }
 );
