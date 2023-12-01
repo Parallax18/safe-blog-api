@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { commentSchema } = require("./post");
 const schema = new mongoose.Schema(
   {
     email: {
@@ -25,6 +26,7 @@ const schema = new mongoose.Schema(
       type: String,
       default: "active",
     },
+    comments: [commentSchema],
   },
   { timestamps: true }
 );

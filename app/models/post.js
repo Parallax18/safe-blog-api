@@ -22,6 +22,10 @@ const commentSchema = new mongoose.Schema(
       required: true,
       default: "",
     },
+    isFlagged: {
+      type: Boolean,
+      default: false,
+    },
     replies: [replySchema],
   },
   { timestamps: true }
@@ -47,5 +51,6 @@ const postSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+exports.commentSchema = commentSchema;
 const post = new mongoose.model("Post", postSchema);
 module.exports = post;

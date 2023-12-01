@@ -14,9 +14,13 @@ exports.login = async (req, res, next) => {
     res.status(400).send({ message: "Content can not be empty!" });
   }
   try {
-    const user = await UserModel.findOne({ email: "superadmin@email.com" });
+    const user = await UserModel.findOne({ email });
     if (!user) {
-      return res.json({ message: "User is not an admin" });
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    if (user.email !== "superadmin@email.com") {
+      return res.status(400).json({ message: "User is not an admin" });
     }
 
     if (password !== "superadmin") {

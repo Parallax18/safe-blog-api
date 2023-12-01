@@ -93,6 +93,17 @@ exports.update = async (req, res) => {
     });
 };
 
+// exports.flagComment = async (req, res) => {
+//   const { comment_id, post_id } = req.params;
+
+//   const comment = await PostModel.findById(post_id).comments.find(
+//     (comment) => comment._id === comment_id
+//   );
+//   comment.isFlagged = true;
+
+//   await PostModel.findByIdAndUpdate(post_id);
+// };
+
 // Delete a post with the specified id in the request
 exports.destroy = async (req, res) => {
   await PostModel.findByIdAndRemove(req.params.id)
