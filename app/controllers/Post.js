@@ -32,16 +32,16 @@ exports.create = async (req, res) => {
 exports.findAll = async (req, res) => {
   try {
     const post = await PostModel.find();
-    const populatedPost = await PostModel.find().exec();
-    await PostModel.populate(populatedPost, { path: "comments" });
-    await PostModel.populate(populatedPost, { path: "comments.author" });
-    await PostModel.populate(populatedPost, {
+    // const populatedPost = await PostModel.find().exec();
+    await PostModel.populate(post, { path: "comments" });
+    await PostModel.populate(post, { path: "comments.author" });
+    await PostModel.populate(post, {
       path: "comments.replies",
     });
-    await PostModel.populate(populatedPost, {
+    await PostModel.populate(post, {
       path: "comments.replies.author",
     });
-    res.status(200).json(populatedPost);
+    res.status(200).json(post);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
@@ -54,9 +54,12 @@ exports.findOne = async (req, res) => {
       "comments"
     );
     await PostModel.populate(populatedPost, { path: "comments.author" });
-    // await PostModel.populate(populatedPost, {
-    //   path: "comments.replies.author",
-    // });
+    await PostModel.populate(populatedPost, {
+      path: "comments.replies",
+    });
+    await PostModel.populate(populatedPost, {
+      path: "comments.replies.author",
+    });
     res.status(200).json(populatedPost);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -79,8 +82,11 @@ exports.update = async (req, res) => {
           message: `post not found.`,
         });
       } else {
-        const populatedPost = await PostModel.findById(id).exec();
+        const populatedPost = await PostModel.findById(id).populate("comments");
         await PostModel.populate(populatedPost, { path: "comments.author" });
+        await PostModel.populate(populatedPost, {
+          path: "comments.replies",
+        });
         await PostModel.populate(populatedPost, {
           path: "comments.replies.author",
         });
