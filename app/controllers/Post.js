@@ -33,7 +33,11 @@ exports.findAll = async (req, res) => {
   try {
     const post = await PostModel.find();
     const populatedPost = await PostModel.find().exec();
+    await PostModel.populate(populatedPost, { path: "comments" });
     await PostModel.populate(populatedPost, { path: "comments.author" });
+    await PostModel.populate(populatedPost, {
+      path: "comments.replies",
+    });
     await PostModel.populate(populatedPost, {
       path: "comments.replies.author",
     });
@@ -45,12 +49,14 @@ exports.findAll = async (req, res) => {
 // Find a single post with an id
 exports.findOne = async (req, res) => {
   try {
-    const post = await PostModel.findById(req.params.id);
-    const populatedPost = await PostModel.findById(req.params.id).exec();
+    // const post = await PostModel.findById(req.params.id);
+    const populatedPost = await PostModel.findById(req.params.id).populate(
+      "comments"
+    );
     await PostModel.populate(populatedPost, { path: "comments.author" });
-    await PostModel.populate(populatedPost, {
-      path: "comments.replies.author",
-    });
+    // await PostModel.populate(populatedPost, {
+    //   path: "comments.replies.author",
+    // });
     res.status(200).json(populatedPost);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -92,17 +98,6 @@ exports.update = async (req, res) => {
       });
     });
 };
-
-// exports.flagComment = async (req, res) => {
-//   const { comment_id, post_id } = req.params;
-
-//   const comment = await PostModel.findById(post_id).comments.find(
-//     (comment) => comment._id === comment_id
-//   );
-//   comment.isFlagged = true;
-
-//   await PostModel.findByIdAndUpdate(post_id);
-// };
 
 // Delete a post with the specified id in the request
 exports.destroy = async (req, res) => {
