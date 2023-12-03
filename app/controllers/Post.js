@@ -1,4 +1,14 @@
 const PostModel = require("../models/post.js");
+const CommentModel = require("../models/comment.js");
+
+const populateReplies = async (comment) => {
+  await CommentModel.populate(comment, { path: "replies" });
+
+  for (const reply of comment.replies) {
+    await populateReplies(reply);
+    await CommentModel.populate(reply, { path: "author" }); // Populate author of the reply
+  }
+};
 
 exports.create = async (req, res) => {
   const { title, body } = req.body;
@@ -31,36 +41,36 @@ exports.create = async (req, res) => {
 // Retrieve all posts from the database.
 exports.findAll = async (req, res) => {
   try {
-    const post = await PostModel.find();
-    // const populatedPost = await PostModel.find().exec();
-    await PostModel.populate(post, { path: "comments" });
-    await PostModel.populate(post, { path: "comments.author" });
-    await PostModel.populate(post, {
-      path: "comments.replies",
-    });
-    await PostModel.populate(post, {
-      path: "comments.replies.author",
-    });
-    res.status(200).json(post);
+    const posts = await PostModel.find().lean();
+
+    for (const post of posts) {
+      post.comments = await CommentModel.find({ _id: { $in: post.comments } })
+        .populate("author")
+        .lean();
+
+      for (const comment of post.comments) {
+        await populateReplies(comment);
+      }
+    }
+    res.status(200).json(posts);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
+
 // Find a single post with an id
 exports.findOne = async (req, res) => {
   try {
-    // const post = await PostModel.findById(req.params.id);
-    const populatedPost = await PostModel.findById(req.params.id).populate(
-      "comments"
-    );
-    await PostModel.populate(populatedPost, { path: "comments.author" });
-    await PostModel.populate(populatedPost, {
-      path: "comments.replies",
-    });
-    await PostModel.populate(populatedPost, {
-      path: "comments.replies.author",
-    });
-    res.status(200).json(populatedPost);
+    const post = await PostModel.findById(req.params.id).lean();
+    post.comments = await CommentModel.find({ _id: { $in: post.comments } })
+      .populate("author replies replies.author")
+      .lean();
+
+    for (const comment of post.comments) {
+      await populateReplies(comment);
+    }
+
+    res.status(200).json(post);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
@@ -82,7 +92,9 @@ exports.update = async (req, res) => {
           message: `post not found.`,
         });
       } else {
-        const populatedPost = await PostModel.findById(id).populate("comments");
+        const populatedPost = await PostModel.findById(id);
+        await PostModel.populate(post, { path: "comments" });
+
         await PostModel.populate(populatedPost, { path: "comments.author" });
         await PostModel.populate(populatedPost, {
           path: "comments.replies",
