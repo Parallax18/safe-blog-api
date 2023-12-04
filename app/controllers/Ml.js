@@ -6,10 +6,7 @@ exports.predict = async (req, res) => {
     const { text } = req.body;
 
     // Call the Python script for prediction
-    const predictScript = spawn("/usr/bin/python3", [
-      "app/ml/predict.py",
-      text,
-    ]);
+    const predictScript = spawn("python3", ["app/ml/predict.py", text]);
 
     predictScript.stdout.on("data", (data) => {
       const predictionResult = JSON.parse(data.toString());
