@@ -81,34 +81,30 @@ async function checkAndFlagComment(comment, res) {
 // Function to flag a comment
 async function flagComment(commentId, author, res) {
   const authorId = author._id; // Assuming author is a User model instance
-
   const session = await mongoose.startSession();
   session.startTransaction();
-
   try {
     const user = await UserModel.findById(authorId).session(session);
-
     // Check if the user exists
     if (!user) {
       throw new Error("User not found");
     }
-
     if (user.flags < 4) {
       user.flags += 1;
       await user.save();
     }
-
+    if (user.flags === 4) {
+      (user.status = "blocked"), await user.save();
+    }
     // Update the comment
     const updatedComment = await CommentModel.findByIdAndUpdate(
       commentId,
       { isFlagged: true },
       { new: true, useFindAndModify: false, session }
     );
-
     if (!updatedComment) {
       throw new Error("Comment not found");
     }
-
     await session.commitTransaction();
     session.endSession();
 
