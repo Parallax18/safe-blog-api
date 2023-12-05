@@ -30,10 +30,10 @@ app.listen(3000, () => {
 const UserRoute = require("./app/routes/user-routes.js");
 const PostRoute = require("./app/routes/post-routes.js");
 const AuthRoute = require("./app/routes/auth-routes.js");
-const CommentRoute = require("./app/routes/comment-routes.js");
+// const CommentRoute = require("./app/routes/comment-routes.js");
 const MLRoute = require("./app/routes/ml-routes.js");
 app.use("/user", UserRoute);
 app.use("/post", PostRoute);
 app.use("/login", AuthRoute);
-app.use("/comment", CommentRoute);
-app.use("/ml", MLRoute);
+// app.use("/comment", CommentRoute);
+// app.use("/ml", MLRoute);

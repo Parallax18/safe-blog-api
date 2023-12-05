@@ -3,7 +3,11 @@ const { spawn } = require("child_process");
 // API endpoint to make predictions
 exports.predict = async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, comment_id, author_id } = req.body;
+    if (!author_id || !comment_id || !text) {
+      res.status(400).send("Missing Values!");
+      return;
+    }
 
     // Call the Python script for prediction
     const predictScript = spawn("python3", ["app/ml/predict.py", text]);
